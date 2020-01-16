@@ -1,2 +1,2 @@
 # Credit_scoring_model
-Social Credit Scoring Model 
+Credit Scoring Model based on Social footprints
