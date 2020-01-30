@@ -15,7 +15,7 @@ class Interest:
 
     def get_interest(self, url):
         data=pd.read_csv(url, header = 0, converters={0:str,1:str})
-        data = data.head(100) ### For testing purpose !!!!!
+        data = data.head(1000) ### For testing purpose !!!!!
         data = self.interest_standardize(data, std=False)
         fbids=np.array(data['USER_ID'])
         return data, fbids
@@ -23,11 +23,11 @@ class Interest:
     def data_merge(self, merge=True):
         print('Start getting interest data for training...')
         start = time.time()
-        data_lv1, self.fbids_lv1=self.get_interest('training_data/M_TRAINING_CLEAN_LV1.csv')
-        data_lv2, self.fbids_lv2=self.get_interest('training_data/M_TRAINING_CLEAN_LV2.csv')
-        data_lv3, self.fbids_lv3=self.get_interest('training_data/M_TRAINING_CLEAN_LV3.csv')
-        data_lv4, self.fbids_lv4=self.get_interest('training_data/M_TRAINING_CLEAN_LV4.csv')
-        data_lv5, self.fbids_lv5=self.get_interest('training_data/M_TRAINING_CLEAN_LV5.csv')
+        data_lv1, self.fbids_lv1=self.get_interest('training_data/CLIENT_TRAINING_CLEAN_LV1.csv')
+        data_lv2, self.fbids_lv2=self.get_interest('training_data/CLIENT_TRAINING_CLEAN_LV2.csv')
+        data_lv3, self.fbids_lv3=self.get_interest('training_data/CLIENT_TRAINING_CLEAN_LV3.csv')
+        data_lv4, self.fbids_lv4=self.get_interest('training_data/CLIENT_TRAINING_CLEAN_LV4.csv')
+        data_lv5, self.fbids_lv5=self.get_interest('training_data/CLIENT_TRAINING_CLEAN_LV5.csv')
         print('Done getting interest data for training. Time taken = {:.1f}(s) \n'.format(time.time()-start))
         data_final = make_copy(data_lv1)
         dfs = [data_lv2, data_lv3, data_lv4, data_lv5]
@@ -56,7 +56,7 @@ class Interest:
         sum_ids = interest_strength.sum(axis=0)
         sum_ids[sum_ids != 0]
         ids = sum_ids[sum_ids != 0].index
-        return interest_strength, ids, self.fbids_lv1, self.fbids_lv2, self.fbids_lv3, self.fbids_lv4, self.fbids_lv5
+        return interest_strength, ids
 
     def interest_standardize(self, interest_data, ids=None, std=False):
         interest_data=interest_data.iloc[:,1:]

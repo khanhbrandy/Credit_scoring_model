@@ -14,7 +14,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 from mlxtend.classifier import StackingClassifier, StackingCVClassifier, EnsembleVoteClassifier
 from sklearn.externals import joblib
-from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
 
 
@@ -30,7 +29,8 @@ class Mymetrics():
     def roc_curve(self, y_test, y_pred):
         fpr, tpr, threshold = metrics.roc_curve(y_test, y_pred)
         return fpr, tpr, threshold
-    def auc_score(self, fpr, tpr):
+    def auc_score(self, y_test, y_pred):
+        fpr, tpr, threshold = self.roc_curve(y_test, y_pred)
         roc_auc = metrics.auc(fpr, tpr)
         print('Classifier AUC: {:.2f}%'.format(roc_auc*100))
         return roc_auc
@@ -94,50 +94,28 @@ class Model(Myvisualization):
                     C=10000, 
                     class_weight='balanced'
                     )
-        self.clf_4 = EnsembleVoteClassifier(clfs=[self.clf_0, self.clf_1, self.clf_2], weights=[1,1,1])
-        self.clf_5 = StackingClassifier(classifiers=[self.clf_0, self.clf_2], meta_classifier=self.clf_3, use_probas=True)
-        
-    
-    def split_data(self, data, seed, re=False):
-        X, y = data.iloc[:,1:-1],data.iloc[:,-1]
-        # Train-Test split
-        test_size = 0.2
-        X_train_o, X_test, y_train_o, y_test = model_selection.train_test_split(X, y, test_size=test_size, random_state=seed)
-        # Resampling
-        if re:
-            resam=SMOTE(random_state=seed)
-            resam.fit(X_train_o, y_train_o)
-            X_train, y_train = resam.fit_resample(X_train_o, y_train_o)
-            X_train = pd.DataFrame(X_train, columns=X_train_o.columns)
-            y_train = pd.Series(y_train)
-        else:
-            X_train, y_train = X_train_o,y_train_o
-        return X, y, X_train, y_train, X_test, y_test
 
-    def model_ensemble(self, X, y, method):
-        def base_fit(X, y, clf_list, clf_name, meta_clf):
-            clf_list.append(meta_clf)
-            clf_name.append(meta_clf.__class__.__name__)
-            enum = zip(clf_list, clf_name)
+    def model_ensemble(self, X, y, method='v'):
+        if method == 'v':
+            print('********** Voting method choosen **********')
+            evc_meta = EnsembleVoteClassifier(clfs=[self.clf_0, self.clf_1, self.clf_2], weights=[1,1,1])
             print('Start fitting base classifiers with 3-fold cross validation...')
             start = time.time()
-            for clf, label in enum:
+            for clf, label in zip([self.clf_0, self.clf_1, self.clf_2, evc_meta],['XGBoost', 'AdaBoost', 'LightGBM', 'VotingClassifier']):
                 scores = model_selection.cross_val_score(clf, X, y, cv=3, scoring='roc_auc')
                 print('Accuracy: {:.2f} (+/- {:.2f}) [{}]'.format(scores.mean(), scores.std(), label))
             print('Done fitting base classifiers. Time taken = {:.1f}(s) \n'.format(time.time()-start))
-            return meta_clf
-        if method == 'v':
-            print('********** Voting method choosen **********')
-            clf_list = [self.clf_0, self.clf_1, self.clf_2]
-            clf_name = [self.clf_0.__class__.__name__, self.clf_1.__class__.__name__, self.clf_2.__class__.__name__]
-            meta_clf = base_fit(X, y, clf_list, clf_name, self.clf_4)
-            return meta_clf
+            return evc_meta
         elif method == 's': 
             print('********** Stacking method choosen **********')
-            clf_list = [self.clf_0, self.clf_2]
-            clf_name = [self.clf_0.__class__.__name__, self.clf_2.__class__.__name__]
-            meta_clf = base_fit(X, y, clf_list, clf_name, self.clf_5)
-            return meta_clf
+            sc_meta = StackingClassifier(classifiers=[self.clf_0, self.clf_2], meta_classifier=self.clf_3, use_probas=True)
+            print('Start fitting base classifiers with 3-fold cross validation...')
+            start = time.time()
+            for clf, label in zip([self.clf_0, self.clf_2, sc_meta], ['XGBoost', 'LightGBM', 'StackingClassifier']):
+                scores = model_selection.cross_val_score(clf, X, y, cv=3, scoring='roc_auc')
+                print('Accuracy: {:.2f} (+/- {:.2f}) [{}]'.format(scores.mean(), scores.std(), label))
+            print('Done fitting base classifiers. Time taken = {:.1f}(s) \n'.format(time.time()-start))
+            return sc_meta
         else:
             print('********** Please specify preferred method ! **********')
 

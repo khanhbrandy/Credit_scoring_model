@@ -13,9 +13,18 @@ import brandy_model
 import joblib
 import warnings
 
-def build_model(data, seed, method):
+def data_prep(seed):
+    profile = brandy_profile.Profile()
+    interest = brandy_interest.Interest()
+    preprocess = brandy_preprocess.Preprocessor()
+    profile_raw = profile.get_profile()
+    interest_raw, ids = interest.data_merge()
+    data = preprocess.finalize_data(profile_raw, interest_raw)
+    X, y, X_train, y_train, X_test, y_test = preprocess.split_data(data, seed=seed, re=False)
+    return X, y, X_train, y_train, X_test, y_test, ids
+
+def build_model(X, y, X_train, y_train, X_test, y_test, seed, method, ):
     model = brandy_model.Model()
-    X, y, X_train, y_train, X_test, y_test = model.split_data(data, seed=seed, re=False)
     evc_meta = model.model_ensemble(X, y, method=method)
     model.model_predict(evc_meta,X_train,y_train,X_test,y_test, seed=seed)
     model.cross_validate(evc_meta, X, y, seed)
@@ -25,19 +34,13 @@ def build_model(data, seed, method):
     return evc_meta
 if __name__=='__main__':
     print('***************************************************************************************') 
-    print('*************************************************************************************** \n')
+    print('***************************************************************************************')
     seed = 50
-    print('With v represents VotingClassifier and s represents StackingClassifier.')
+    print(' \n With v represents VotingClassifier and s represents StackingClassifier.')
     method = input('Please specify preferred method (v or s): ')
-    profile = brandy_profile.Profile()
-    interest = brandy_interest.Interest()
-    preprocess = brandy_preprocess.Preprocessor()
-    profile_raw = profile.get_profile()
-    interest_raw, ids, fbids_lv1, fbids_lv2, fbids_lv3, fbids_lv4, fbids_lv5 = interest.data_merge()
-    # interest_raw.to_excel('interest.xlsx')
-    data = preprocess.finalize_data(profile_raw, interest_raw)
     warnings.filterwarnings('ignore', category=FutureWarning)
-    evc_meta = build_model(data, seed=seed, method=method)
+    X, y, X_train, y_train, X_test, y_test, ids = data_prep(seed)
+    evc_meta = build_model(X, y, X_train, y_train, X_test, y_test, seed=seed, method=method)
     print('***************************************************************************************')
     print('***************************************************************************************')
 
