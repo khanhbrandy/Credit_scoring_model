@@ -14,6 +14,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 from mlxtend.classifier import StackingClassifier, StackingCVClassifier, EnsembleVoteClassifier
 from sklearn.externals import joblib
+from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
 
 

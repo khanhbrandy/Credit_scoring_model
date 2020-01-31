@@ -50,7 +50,7 @@ class Profile:
             return 'Other'
         
     def lbl_encode(self, profile_data):
-        profile_data.set_index('USER_ID', inplace=True)
+        profile_data.set_index('FACEBOOK_ID', inplace=True)
         for f in profile_data.columns: 
             if f=='AGE_RANGE':
                 profile_data[f]=profile_data[f].map({'<= 21':0,'22':1,'23-27':2,'28-30':3,'31-60':4,'>= 61':5})
@@ -64,10 +64,10 @@ class Profile:
         profile_data=profile_data.reset_index()
         return profile_data
 
-    def get_profile(self):
+    def get_profile(self, profile_link):
         print('Start getting profile data for training...')
         start = time.time()
-        profile_data=pd.read_csv('training_data/CLIENT_TRAINING_CLEAN_2_DEMO.csv', header = 0, converters={'USER_ID':str,'AGE':int,'GB':str})
+        profile_data=pd.read_csv(profile_link, header = 0, converters={'FACEBOOK_ID':str,'AGE':int,'GB':str})
         profile_data=profile_data[profile_data['GB']!='2']
         profile_data['AGE_RANGE'] = profile_data['AGE'].map(self.age_bin)
         profile_data['RELATIONSHIP_F9']=profile_data['RELATIONSHIP_F9'].map(self.rls_convert)

@@ -13,15 +13,15 @@ import brandy_model
 import joblib
 import warnings
 
-def data_prep(seed):
+def preprocess_data(profile_link, level_list, seed):
     profile = brandy_profile.Profile()
     interest = brandy_interest.Interest()
-    preprocess = brandy_preprocess.Preprocessor()
-    profile_raw = profile.get_profile()
-    interest_raw, ids = interest.data_merge()
+    preprocess = brandy_preprocess.Preprocessor()    
+    profile_raw = profile.get_profile(profile_link)
+    interest_raw, ids = interest.data_merge(level_list)
     data = preprocess.finalize_data(profile_raw, interest_raw)
     X, y, X_train, y_train, X_test, y_test = preprocess.split_data(data, seed=seed, re=False)
-    return X, y, X_train, y_train, X_test, y_test, ids
+    return X, y, X_train, y_train, X_test, y_test
 
 def build_model(X, y, X_train, y_train, X_test, y_test, seed, method, ):
     model = brandy_model.Model()
@@ -36,10 +36,17 @@ if __name__=='__main__':
     print('***************************************************************************************') 
     print('***************************************************************************************')
     seed = 50
+    level_list = [
+        {'level':'LV1', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV1.csv'},
+        {'level':'LV2', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV2.csv'},
+        {'level':'LV3', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV3.csv'},
+        {'level':'LV4', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV4.csv'},
+        {'level':'LV5', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV5.csv'}]
+    profile_link = 'training_data/CLIENT_TRAINING_CLEAN_2_DEMO.csv'
     print(' \n With v represents VotingClassifier and s represents StackingClassifier.')
     method = input('Please specify preferred method (v or s): ')
     warnings.filterwarnings('ignore', category=FutureWarning)
-    X, y, X_train, y_train, X_test, y_test, ids = data_prep(seed)
+    X, y, X_train, y_train, X_test, y_test = preprocess_data(profile_link, level_list, seed)
     evc_meta = build_model(X, y, X_train, y_train, X_test, y_test, seed=seed, method=method)
     print('***************************************************************************************')
     print('***************************************************************************************')
