@@ -37,12 +37,12 @@ if __name__=='__main__':
     print('***************************************************************************************')
     seed = 50
     level_list = [
-        {'level':'LV1', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV1.csv'},
-        {'level':'LV2', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV2.csv'},
-        {'level':'LV3', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV3.csv'},
-        {'level':'LV4', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV4.csv'},
-        {'level':'LV5', 'link':'training_data/CLIENT_TRAINING_CLEAN_LV5.csv'}]
-    profile_link = 'training_data/CLIENT_TRAINING_CLEAN_2_DEMO.csv'
+        {'level':'LV1', 'link':'training_data/M_TRAINING_CLEAN_LV1.csv'},
+        {'level':'LV2', 'link':'training_data/M_TRAINING_CLEAN_LV2.csv'},
+        {'level':'LV3', 'link':'training_data/M_TRAINING_CLEAN_LV3.csv'},
+        {'level':'LV4', 'link':'training_data/M_TRAINING_CLEAN_LV4.csv'},
+        {'level':'LV5', 'link':'training_data/M_TRAINING_CLEAN_LV5.csv'}]
+    profile_link = 'training_data/M_TRAINING_CLEAN_2_DEMO.csv'
     print(' \n With v represents VotingClassifier and s represents StackingClassifier.')
     method = input('Please specify preferred method (v or s): ')
     warnings.filterwarnings('ignore', category=FutureWarning)

@@ -17,7 +17,7 @@ class Interest:
         data=pd.read_csv(url, header = 0, converters={0:str,1:str})
         data = data.head(100) ### For testing purpose !!!!!
         data = self.interest_standardize(data, std=False)
-        fbids=np.array(data['USER_ID'])
+        fbids=np.array(data['FBID'])
         return data, fbids
     
     def interest_standardize(self, interest_data, ids=None, std=False):
@@ -27,7 +27,7 @@ class Interest:
         else:
             interest_data=interest_data[ids]
         if std:
-            interest_data.set_index('USER_ID', inplace=True)
+            interest_data.set_index('FBID', inplace=True)
             scaler = preprocessing.StandardScaler()
             interest_data_stded=scaler.fit_transform(interest_data.values)
             df_interest_data_stded=pd.DataFrame(interest_data_stded, index=interest_data.index,columns=interest_data.columns)
@@ -46,7 +46,7 @@ class Interest:
         dfs = [level_list[i]['data'] for i in range(1,5)]
         if merge:
             for df in dfs:
-                data_final = data_final.merge(df, on=['USER_ID'], how='left')
+                data_final = data_final.merge(df, on=['FBID'], how='left')
                 interest_strength = data_final.fillna(0)
         else:
             interest_strength=level_list[4]['data'].fillna(0)
@@ -64,7 +64,7 @@ class Interest:
                             return 2
                         else:
                             return 1
-        interest_strength['INTEREST_LEVEL'] = interest_strength['USER_ID'].map(level_convert)
+        interest_strength['INTEREST_LEVEL'] = interest_strength['FBID'].map(level_convert)
         # Get ids 
         sum_ids = interest_strength.sum(axis=0)
         sum_ids[sum_ids != 0]

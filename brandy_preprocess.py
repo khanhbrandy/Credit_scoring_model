@@ -17,21 +17,21 @@ class Preprocessor:
         print('Start merging data for training...')
         start = time.time()
         data=pd.merge(interest_strength, profile_data[[
-                                               'USER_ID',
+                                               'FBID',
                                                'AGE',
                                             #    'AGE_RANGE',
                                                'GENDER',
                                                'PRODUCT',
                                                'LOCATION_F9',
-                                               'LOCATION_CLIENT',
+                                               'LOCATION_M',
                                                'LOCATION_CHECK',
                                                'RELATIONSHIP_F9',
-                                               'RELATIONSHIP_CLIENT',
+                                               'RELATIONSHIP_M',
                                                'RELATIONSHIP_CHECK',
                                                'EDUCATION',
                                             #    'INTEREST_LEVEL',
                                                'GB'
-                                               ]], how='inner', on='USER_ID')
+                                               ]], how='inner', on='FBID')
         data.dropna(inplace=True)
         print('Done merging data for training. Time taken = {:.1f}(s) \n'.format(time.time()-start))
         return data

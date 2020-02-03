@@ -23,33 +23,31 @@ class Mymetrics():
     def __init__(self):
         pass
     def accuracy(self, y_test, y_pred):
-        # Accuracy
         acc = metrics.accuracy_score(y_test, y_pred)
-        print('Classifier Accuracy: {:.2f}%'.format(acc * 100))
+        # print('Accuracy: {:.2f}%'.format(acc * 100))
         return acc
-    def roc_curve(self, y_test, y_pred):
-        fpr, tpr, threshold = metrics.roc_curve(y_test, y_pred)
+    def roc_curve(self, y_test, y_pred_proba):
+        fpr, tpr, threshold = metrics.roc_curve(y_test, y_pred_proba)
         return fpr, tpr, threshold
-    def auc_score(self, y_test, y_pred):
-        fpr, tpr, threshold = self.roc_curve(y_test, y_pred)
-        roc_auc = metrics.auc(fpr, tpr)
-        print('Classifier AUC: {:.2f}%'.format(roc_auc*100))
+    def auc_score(self, y_test, y_pred_proba):
+        roc_auc = metrics.roc_auc_score(y_test, y_pred_proba)
+        # print('Classifier AUC: {:.2f}%'.format(roc_auc*100))
         return roc_auc
     def precision_score(self, y_test, y_pred):
         precision_scr = metrics.precision_score(y_test, y_pred)
-        print('Precision score is {:.2f}'.format(float(precision_scr)))
+        # print('Precision score is {:.2f}'.format(float(precision_scr)))
         return precision_scr
     def recall_score(self, y_test, y_pred):
         recall_scr = metrics.recall_score(y_test, y_pred)
-        print('Recall score is {:.2f}'.format(float(recall_scr)))
+        # print('Recall score is {:.2f}'.format(float(recall_scr)))
         return recall_scr
 
 class Myvisualization(Mymetrics):
     def __init__(self):
         pass
-    def roc_auc_viz(self, y_test,y_pred):
-        fpr, tpr, threshold = self.roc_curve(y_test, y_pred)
-        roc_auc = self.auc_score(fpr, tpr)    
+    def roc_auc_viz(self, y_test,y_pred_proba):
+        fpr, tpr, threshold = self.roc_curve(y_test, y_pred_proba)
+        roc_auc = self.auc_score(y_test, y_pred_proba)    
         gini_score=2*roc_auc-1
         plt.title('Receiver Operating Characteristic')
         plt.plot(fpr, tpr, 'b', label = 'AUC = {:.2f} and GINI = {:.2f}'.format(roc_auc,gini_score))
@@ -58,6 +56,7 @@ class Myvisualization(Mymetrics):
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
         pass
+        
 class Model(Myvisualization):
     def __init__(self):
         self.clf_0 = xgb.XGBClassifier(
@@ -128,15 +127,18 @@ class Model(Myvisualization):
         model.fit(X_train, y_train)
         # Get predictions
         y_pred = model.predict(X_test)
+        y_pred_proba = model.predict_proba(X_test)[:,1]
         # Accuracy
         acc = self.accuracy(y_test, y_pred)
-        fpr, tpr, threshold = self.roc_curve(y_test, model.predict_proba(X_test)[:,1])
-        roc_auc = self.auc_score(fpr, tpr)
+        roc_auc = self.auc_score(y_test, y_pred_proba)
         precision_scr = self.precision_score(y_test, y_pred)
         recall_scr = self.recall_score(y_test, y_pred)
-        # print('{} accuracy: {:.2f}% and AUC: {:.2f}% \n'.format(model.__class__.__name__, acc * 100, roc_auc*100))
+        print('Accuracy: {:.2f}%'.format(acc * 100))
+        print('Meta Classifier AUC: {:.2f}%'.format(roc_auc*100))
+        print('Precision score: {:.2f}'.format(float(precision_scr)))
+        print('Recall score: {:.2f}'.format(float(recall_scr)))
         print('Done fitting meta classifier. Time taken = {:.1f}(s) \n'.format(time.time()-start))
-        pass
+        return model
 
     def cross_validate(self, model, X, y, seed):
         kfold = model_selection.StratifiedKFold(n_splits=4,shuffle=True, random_state=seed)
