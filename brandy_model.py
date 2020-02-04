@@ -103,7 +103,7 @@ class Model(Myvisualization):
             start = time.time()
             for clf, label in zip([self.clf_0, self.clf_1, self.clf_2, evc_meta],['XGBoost', 'AdaBoost', 'LightGBM', 'VotingClassifier']):
                 scores = model_selection.cross_val_score(clf, X, y, cv=3, scoring='roc_auc')
-                print('Accuracy: {:.2f} (+/- {:.2f}) [{}]'.format(scores.mean(), scores.std(), label))
+                print('AUC: {:.2f} (+/- {:.2f}) [{}]'.format(scores.mean(), scores.std(), label))
             print('Done fitting base classifiers. Time taken = {:.1f}(s) \n'.format(time.time()-start))
             return evc_meta
         elif method == 's': 
@@ -113,7 +113,7 @@ class Model(Myvisualization):
             start = time.time()
             for clf, label in zip([self.clf_0, self.clf_2, sc_meta], ['XGBoost', 'LightGBM', 'StackingClassifier']):
                 scores = model_selection.cross_val_score(clf, X, y, cv=3, scoring='roc_auc')
-                print('Accuracy: {:.2f} (+/- {:.2f}) [{}]'.format(scores.mean(), scores.std(), label))
+                print('AUC: {:.2f} (+/- {:.2f}) [{}]'.format(scores.mean(), scores.std(), label))
             print('Done fitting base classifiers. Time taken = {:.1f}(s) \n'.format(time.time()-start))
             return sc_meta
         else:
